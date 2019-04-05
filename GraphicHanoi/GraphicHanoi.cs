@@ -139,6 +139,7 @@ namespace GraphicHanoi
             {
                 hanoilist[i].unShow();
             }
+            apply_change();
         }
 
         public void addmove(int[] ft)
@@ -148,11 +149,6 @@ namespace GraphicHanoi
 
         public delegate void moveevent();
         public static moveevent moveend;
-        void paused()
-        {
-
-
-        }
         public void startmove()
         {
             if (Mainprogram.nextmove())

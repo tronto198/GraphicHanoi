@@ -65,6 +65,7 @@
             // 
             // bt_play
             // 
+            this.bt_play.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bt_play.Location = new System.Drawing.Point(636, 336);
             this.bt_play.Name = "bt_play";
             this.bt_play.Size = new System.Drawing.Size(91, 61);
@@ -76,6 +77,7 @@
             // 
             // bt_retry
             // 
+            this.bt_retry.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bt_retry.Location = new System.Drawing.Point(636, 403);
             this.bt_retry.Name = "bt_retry";
             this.bt_retry.Size = new System.Drawing.Size(91, 58);
@@ -98,6 +100,7 @@
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.ResumeLayout(false);
             this.PerformLayout();
 

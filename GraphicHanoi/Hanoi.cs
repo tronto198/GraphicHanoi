@@ -98,6 +98,62 @@ namespace GraphicHanoi
             return false;
         }
 
+        bool call_movetoanswer(int no_index, int to)
+        {
+            int start = size * to - 1;
+            int end = size * (to - 1);
+
+            //목적지 라인에 탑이 있는지, 있으면 그 위로 탑을 옮길 수 있는지 살펴봄
+            for (int i = size - 1; i >= 0; i--)
+            {
+                int index = i + end;
+                if (arr[index] != 0)
+                {
+                    if (arr[index] > arr[no_index])
+                    {
+                        if((arr[no_index] + size) % 2 == (i + to) % 2)
+                        {
+                            moving(no_index, index + 1);
+                            return true;
+                        }
+                        return false;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            //목적지 라인에 탑이 하나도 없으면 맨 밑으로 옮김
+            if ((arr[no_index] + size) % 2 == (to - 1) % 2)
+            {
+                moving(no_index, end);
+                return true;
+            }
+            return false;
+        }
+        public bool move(int from)
+        {
+            int start = size * from - 1;
+            int end = size * (from - 1);
+            for (int i = start; i >= end; i--)
+            {
+                if(arr[i] == 0)
+                {
+                    continue;
+                }
+                if(arr[i] % 2 == size % 2)
+                {
+                    return call_movetoanswer(i, (from + 1) % 3 + 1);
+                }
+                else
+                {
+                    return call_movetoanswer(i, from % 3 + 1);
+                }
+            }
+            return false;
+        }
+
         //답지 만들어서 반환
         public Hanoi answer()
         {
@@ -183,6 +239,27 @@ namespace GraphicHanoi
             //}
             //return score;
         }
+        public bool gets()
+        {
+            for(int i = 0; i< 3; i++)
+            {
+                int value = arr[i * size];
+                if (value < 2) continue;
+                for(int j = 1; j < size; j++)
+                {
+                    int index = size * i + j;
+                    if(--value != arr[index])
+                    {
+                        break;
+                    }
+                    if(value == 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
         public void pushindex(int thisi, int parenti)
         {
@@ -241,6 +318,8 @@ namespace GraphicHanoi
     class Hanoilist : List<Hanoi>
     {
         List<int>[] list;
+        int searchlimit;
+        public int maxno = 0;
 
         public new void Add(Hanoi h)
         {
@@ -252,6 +331,7 @@ namespace GraphicHanoi
 
         public void setSize(int size)
         {
+            maxno = 0;
             int listsize = (size - 1) * 2;
             //int listsize = size + 1;
             list = new List<int>[listsize];
@@ -259,14 +339,23 @@ namespace GraphicHanoi
             {
                 list[i] = new List<int>();
             }
+            searchlimit = (int)Math.Pow(2, size);
         }
 
         public bool checkExist(Hanoi h)
         {
             int hash = h.gethash();
-            for(int i = 0; i < list[hash].Count; i++)
+            
+            for(int i = 0; i <list[hash].Count; i++)
             {
-                if (h.equal(this[list[hash][i]])) return true;
+                //if (i > searchlimit) return false;
+                int index = list[hash][list[hash].Count - i - 1];
+                //if (Count - index > searchlimit) return false;
+                if (h.equal(this[index]))
+                {
+                    if (this.Count - index > maxno) maxno = this.Count - index;
+                    return true;
+                }
             }
             return false;
         }

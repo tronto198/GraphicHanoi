@@ -17,7 +17,8 @@ namespace GraphicHanoi
         Hanoi ans = null;
         Hanoilist glist = null;
         int size = 0;
-        
+        bool mode = false;
+
         Form1 form;
         static TextViewer tv;
         static DoubleBuffering db;
@@ -52,7 +53,7 @@ namespace GraphicHanoi
             tv.Startcal();
             Task t = Task.Factory.StartNew(() => {
                 sw.Start();
-                ans = Helper.get_answer(hanoi);
+                ans = Helper.get_answer(hanoi, mode);
                 sw.Stop();
                 calend();
             });
@@ -60,28 +61,54 @@ namespace GraphicHanoi
         }
         void calend()
         {
+            if(ans == null)
+            {
+                sw.Reset();
+                return;
+            }
             tv.Endcal(sw.ElapsedMilliseconds, ans.getmovecount());
+            int maxno = glist.maxno;
             sw.Reset();
             form.calend();
         }
 
+        public bool modechange()
+        {
+            mode = !mode;
+            return mode;
+        }
         public void playHanoi()
         {
-            ans.getstack(hindexstack, glist);
             map.set(size);
             map.Show();
 
-            
-            int parent = hindexstack.Pop();
-
-            while (hindexstack.Count != 0)
+            if (mode)
             {
-                int son = hindexstack.Pop();
-                indexq.Enqueue(son);
+                int arrsize = ans.getmovecount() + 1;
+                int parent = 0;
+                int son = parent;
+                while(++son < arrsize)
+                {
+                    indexq.Enqueue(son);
+                    int[] ft = glist[parent].backtracking(glist[son]);
+                    map.addmove(ft);
+                    parent = son;
+                }
+            }
+            else
+            {
+                ans.getstack(hindexstack, glist);
+                int parent = hindexstack.Pop();
 
-                int[] ft = glist[parent].backtracking(glist[son]);
-                map.addmove(ft);
-                parent = son;
+                while (hindexstack.Count != 0)
+                {
+                    int son = hindexstack.Pop();
+                    indexq.Enqueue(son);
+
+                    int[] ft = glist[parent].backtracking(glist[son]);
+                    map.addmove(ft);
+                    parent = son;
+                }
             }
             tv.Startplay();
             map.startmove();
@@ -92,6 +119,7 @@ namespace GraphicHanoi
             indexq.Clear();
             tv.retry();
             playstoping = false;
+            
             try
             {
                 map.unShow();
@@ -102,6 +130,10 @@ namespace GraphicHanoi
 
             }
             Helper.reset();
+        }
+        public void calStop()
+        {
+            //Helper.Stop();
         }
         public void playpause(bool b)
         {
@@ -143,6 +175,8 @@ namespace GraphicHanoi
         string timestr = "";
         static string indexstr = "";
         static int movecount = 0;
+        int previndex = 0;
+        int maxinterval = 0;
 
 
         public delegate void calculate();
@@ -209,6 +243,8 @@ namespace GraphicHanoi
         {
             calunwrite();
             playunwrite();
+            previndex = 0;
+            maxinterval = 0;
             count = 0;
             movecount = 0;
         }
@@ -260,7 +296,11 @@ namespace GraphicHanoi
 
         public void nextmove(int index)
         {
-            indexstr = "move : " + ++movecount + "\nindex : " + index;
+            int interval = (index - previndex);
+            if (interval > maxinterval) maxinterval = interval;
+            indexstr = "move : " + ++movecount + "\nindex : " + index + "\nindexval : " + interval
+                 + "\nmaxinterval : " + maxinterval;
+            previndex = index;
         }
 
 
@@ -284,28 +324,46 @@ namespace GraphicHanoi
         Queue<Hanoi> q = new Queue<Hanoi>();
         Hanoilist Glist = new Hanoilist();
         int maxscore = 0;
+        bool stop = false;
 
         public void reset()
         {
             Glist.Clear();
             q.Clear();
+            stop = false;
             maxscore = 0;
         }
+        public void Stop()
+        {
+            stop = true;
+        }
+        void insertQueue(Hanoi h, Hanoi parent)
+        {
+            if (parent == null)
+            {
+                h.pushindex(Glist.Count, -1);
+            }
+            else
+            {
+                h.pushindex(Glist.Count, parent.getindex());
+            }
+            Glist.Add(h);
 
+            q.Enqueue(h);
+        }
         void InsertQueue(Hanoi h, Hanoi parent)
         {
-            
+            int score = h.getScore();
+            if (score < maxscore)
+            {
+                return;
+            }
+            else if (score > maxscore)
+            {
+                maxscore = score;
+            }
             if (!Glist.checkExist(h))
             {
-                int score = h.getScore();
-                if (score < maxscore)
-                {
-                    return;
-                }
-                else if (score > maxscore)
-                {
-                    maxscore = score;
-                }
                 if (parent == null)
                 {
                     h.pushindex(Glist.Count, -1);
@@ -320,30 +378,44 @@ namespace GraphicHanoi
             }
         }
 
-        public Hanoi get_answer(Hanoi h)
+        public Hanoi get_answer(Hanoi h, bool mode)
         {
             Glist.setSize(h.getSize());
+            
             InsertQueue(h, null);
 
             Hanoi answer = h.answer();
 
             while(q.Count != 0)
             {
+                if (stop) break;
                 Hanoi current = q.Dequeue();
 
                 if (current.equal(answer))
                 {
                     return current;
                 }
+
+                Hanoi clone = current.Clone() as Hanoi;
+
+                if (mode)
+                {
+                    for (int i = 1; i <= 3; i++)
+                    {
+                        if (clone.move(i))
+                        {
+                            insertQueue(clone, current);
+                            clone = current.Clone() as Hanoi;
+                        }
+                    }
+                }
                 else
                 {
-                    Hanoi clone = current.Clone() as Hanoi;
-
-                    for(int i = 1; i <= 3; i++)
+                    for (int i = 1; i <= 3; i++)
                     {
-                        for(int j = 1; j <=3; j++)
+                        for (int j = 1; j <= 3; j++)
                         {
-                            if(i == j)
+                            if (i == j)
                             {
                                 continue;
                             }
@@ -356,9 +428,11 @@ namespace GraphicHanoi
                         }
                     }
                 }
+                    
+                
             }
 
-
+            stop = false;
             return null;
         }
 

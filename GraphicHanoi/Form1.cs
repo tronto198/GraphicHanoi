@@ -14,6 +14,7 @@ namespace GraphicHanoi
     {
         Mainprogram mp;
         bool pause = false;
+        bool playing = false;
         public Form1()
         {
             InitializeComponent();
@@ -35,8 +36,14 @@ namespace GraphicHanoi
                 lb_info.Visible = false;
                 tb_hanoiSize.Visible = false;
 
+                //bt_retry.Visible = true;
+                //bt_retry.Text = "Stop";
+                //bt_retry.Click -= bt_retry_Click;
+                //bt_retry.Click += bt_Stop_Click;
+                tb_hanoiSize.Text = "";
+                this.Focus();
                 mp.setHanoi(size);
-                
+
             }
             catch(Exception ex)
             {
@@ -48,7 +55,10 @@ namespace GraphicHanoi
         {
             this.Invoke(new Action(delegate ()
             {
+                //bt_retry.Click -= bt_Stop_Click;
+                //bt_retry.Click += bt_retry_Click;
                 bt_play.Visible = true;
+                bt_retry.Text = "retry";
                 bt_retry.Visible = true;
                 bt_play.Focus();
             }));
@@ -65,7 +75,7 @@ namespace GraphicHanoi
         private void bt_play_Click(object sender, EventArgs e)
         {
             //bt_play.Visible = false;
-            mp.playHanoi();   
+            mp.playHanoi();
         }
         private void bt_pause_Click(object sender, EventArgs e)
         {
@@ -83,12 +93,16 @@ namespace GraphicHanoi
 
         public void playHanoi()
         {
-            bt_play.Click -= bt_play_Click;
-            bt_play.Click += bt_pause_Click;
-            bt_play.Text = "pause";
+            if (!playing)
+            {
+                playing = true;
+                bt_play.Click -= bt_play_Click;
+                bt_play.Click += bt_pause_Click;
+                bt_play.Text = "pause";
+            }
         }
 
-        private void bt_retry_Click(object sender, EventArgs e)
+        void retry()
         {
             bt_play.Visible = false;
             bt_retry.Visible = false;
@@ -97,19 +111,51 @@ namespace GraphicHanoi
             tb_hanoiSize.Text = "";
             tb_hanoiSize.Visible = true;
             tb_hanoiSize.Focus();
-
-            bt_play.Text = "play";
-            bt_play.Click -= bt_pause_Click;
-            bt_play.Click += bt_play_Click;
-            mp.retry();
-            
         }
 
+        private void bt_retry_Click(object sender, EventArgs e)
+        {
+            if (playing)
+            {
+                playing = false;
+                bt_play.Text = "play";
+                bt_play.Click -= bt_pause_Click;
+                bt_play.Click += bt_play_Click;
+            }
+            mp.retry();
+
+            retry();
+        }
+        private void bt_Stop_Click(object sender, EventArgs e)
+        {
+            mp.calStop();
+            try
+            {
+                bt_retry.Click -= bt_Stop_Click;
+                bt_retry.Click += bt_retry_Click;
+            }
+            catch(Exception ex)
+            {
+
+            }
+            retry();
+        }
         private void tb_hanoiSize_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyData == Keys.Enter)
             {
                 bt_start_Click(null, null);
+            }
+            if(e.KeyData == Keys.P)
+            {
+                if (mp.modechange())
+                {
+                    bt_start.BackColor = Color.Blue;
+                }
+                else
+                {
+                    bt_start.BackColor = Control.DefaultBackColor;
+                }
             }
         }
 
@@ -121,6 +167,11 @@ namespace GraphicHanoi
                 e.Handled = true;
             }
             
+        }
+
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            WinFormlib.DoubleBuffering.getinstance().setGraphicSize(this);
         }
     }
 }
