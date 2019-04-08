@@ -12,10 +12,11 @@ namespace WinFormlib
         private Color backcolor = Color.LightBlue;
         private static DoubleBuffering oInstance = null;
         private BufferedGraphics g;
+        private BufferedGraphics sub_g = null;
 
         //컴퓨터 내부적으로 미리 화면을 그려놓고(getGraphics로 가져온 그래픽 인스턴스에 미리 그려놓음)
         //진짜 화면에 그릴때 이를 한꺼번에 그려서 속도를 빠르게함
-        //(getBuffered에 저장되어 있는 미리 그려놓은 그래픽을 진짜 화면에 그림)
+        //(g에 저장되어 있는 미리 그려놓은 그래픽을 진짜 화면에 그림)
 
         /// <summary>
         /// 인스턴스의 그래픽을 가져옵니다
@@ -83,6 +84,11 @@ namespace WinFormlib
             thread_FrameRender.setCallback(new Action(delegate () {
                 //callback_Draw();
                 Render();
+                if(sub_g != null)
+                {
+                    g = sub_g;
+                    sub_g = null;
+                }
             }));
             thread_FrameRender.setInterval(8);
             thread_FrameRender.Start();
@@ -96,7 +102,7 @@ namespace WinFormlib
         public void setGraphicSize(System.Windows.Forms.Form form)
         {
             Graphics gg = form.CreateGraphics();
-            g = BufferedGraphicsManager.Current.Allocate(gg, form.ClientRectangle);
+            sub_g = BufferedGraphicsManager.Current.Allocate(gg, form.ClientRectangle);
             gg.Dispose();
         }
 

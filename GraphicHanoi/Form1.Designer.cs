@@ -37,6 +37,7 @@
             // 
             // bt_start
             // 
+            this.bt_start.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.bt_start.Location = new System.Drawing.Point(432, 230);
             this.bt_start.Name = "bt_start";
             this.bt_start.Size = new System.Drawing.Size(60, 25);
@@ -47,6 +48,7 @@
             // 
             // tb_hanoiSize
             // 
+            this.tb_hanoiSize.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.tb_hanoiSize.Location = new System.Drawing.Point(341, 230);
             this.tb_hanoiSize.Name = "tb_hanoiSize";
             this.tb_hanoiSize.Size = new System.Drawing.Size(85, 25);
@@ -56,6 +58,7 @@
             // 
             // lb_info
             // 
+            this.lb_info.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lb_info.AutoSize = true;
             this.lb_info.Location = new System.Drawing.Point(296, 233);
             this.lb_info.Name = "lb_info";

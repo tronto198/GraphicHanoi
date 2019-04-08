@@ -39,8 +39,14 @@ namespace GraphicHanoi
             tv = new TextViewer();
 
             Helper = new ansHanoi();
-            map = new GraphicMap();
+            map = new GraphicMap(form);
             GraphicMap.moveend += moveend;
+        }
+
+        public void form_sizechange()
+        {
+            Size s = form.ClientSize;
+            tv.setSize(s);
         }
 
         public void setHanoi(int size)
@@ -53,7 +59,15 @@ namespace GraphicHanoi
             tv.Startcal();
             Task t = Task.Factory.StartNew(() => {
                 sw.Start();
-                ans = Helper.get_answer(hanoi, mode);
+                try
+                {
+                    ans = Helper.get_answer(hanoi, mode);
+                }
+                catch(Exception e)
+                {
+                    
+                }
+                
                 sw.Stop();
                 calend();
             });
@@ -63,10 +77,12 @@ namespace GraphicHanoi
         {
             if(ans == null)
             {
-                sw.Reset();
-                return;
+                tv.Endcal(sw.ElapsedMilliseconds, 0);
             }
-            tv.Endcal(sw.ElapsedMilliseconds, ans.getmovecount());
+            else
+            {
+                tv.Endcal(sw.ElapsedMilliseconds, ans.getmovecount());
+            }
             int maxno = glist.maxno;
             sw.Reset();
             form.calend();
@@ -90,7 +106,7 @@ namespace GraphicHanoi
                 while(++son < arrsize)
                 {
                     indexq.Enqueue(son);
-                    int[] ft = glist[parent].backtracking(glist[son]);
+                    short[] ft = glist[parent].backtracking(glist[son]);
                     map.addmove(ft);
                     parent = son;
                 }
@@ -105,7 +121,7 @@ namespace GraphicHanoi
                     int son = hindexstack.Pop();
                     indexq.Enqueue(son);
 
-                    int[] ft = glist[parent].backtracking(glist[son]);
+                    short[] ft = glist[parent].backtracking(glist[son]);
                     map.addmove(ft);
                     parent = son;
                 }
@@ -167,6 +183,10 @@ namespace GraphicHanoi
         bool caldrawing = false;
         bool playdrawing = false;
 
+        Point strpoint = new Point();
+        Point timepoint = new Point();
+        Point indexpoint = new Point();
+
         const int plusdot = 100;
         const int dotnum = 3;
         int currentdotnum = 0;
@@ -194,8 +214,21 @@ namespace GraphicHanoi
                     calc();
             });
             cal.Start();
-
+            strpoint = new Point(270, 150);
+            timepoint = new Point(270, 180);
+            indexpoint = new Point(550, 180);
             
+        }
+
+        public void setSize(Size s)
+        {
+            strpoint.X = s.Width / 2 - 80;
+            strpoint.Y = s.Height / 2 - 80;
+            timepoint.X = s.Width / 2 - 80;
+            timepoint.Y = s.Height / 2 - 50;
+
+            indexpoint.X = s.Width - 150;
+            indexpoint.Y = s.Height - 250;
         }
 
         public void set(int size, Hanoilist list)
@@ -298,8 +331,8 @@ namespace GraphicHanoi
         {
             int interval = (index - previndex);
             if (interval > maxinterval) maxinterval = interval;
-            indexstr = "move : " + ++movecount + "\nindex : " + index + "\nindexval : " + interval
-                 + "\nmaxinterval : " + maxinterval;
+            indexstr = "move : " + ++movecount + "\nindex : " + index + "\ninterval : " + interval
+                 ;// + "\nmaxinterval : " + maxinterval;
             previndex = index;
         }
 
@@ -307,15 +340,15 @@ namespace GraphicHanoi
 
         void drawwait()
         {
-            DoubleBuffering.getinstance().getGraphics.DrawString(str, font, brush, 270, 150);
+            DoubleBuffering.getinstance().getGraphics.DrawString(str, font, brush, strpoint);
         }
         void drawtime()
         {
-            DoubleBuffering.getinstance().getGraphics.DrawString(timestr, f, brush, 270, 180);
+            DoubleBuffering.getinstance().getGraphics.DrawString(timestr, f, brush, timepoint);
         }
         void drawindexno()
         {
-            DoubleBuffering.getinstance().getGraphics.DrawString(indexstr, f, brush, 550, 180);
+            DoubleBuffering.getinstance().getGraphics.DrawString(indexstr, f, brush, indexpoint);
         }
     }
 
@@ -337,7 +370,7 @@ namespace GraphicHanoi
         {
             stop = true;
         }
-        void insertQueue(Hanoi h, Hanoi parent)
+        void push(Hanoi h, Hanoi parent)
         {
             if (parent == null)
             {
@@ -350,6 +383,26 @@ namespace GraphicHanoi
             Glist.Add(h);
 
             q.Enqueue(h);
+        }
+        void insertQueue(Hanoi h, Hanoi p)
+        {
+            int score = h.getScore();
+            if (score < maxscore)
+            {
+                return;
+            }
+            else if (score > maxscore)
+            {
+                maxscore = score;
+            }
+            if (!Glist.checkExist(h))
+            {
+                if (h.gets())
+                {
+                    //q.Clear();
+                }
+                push(h, p);
+            }
         }
         void InsertQueue(Hanoi h, Hanoi parent)
         {
@@ -364,17 +417,7 @@ namespace GraphicHanoi
             }
             if (!Glist.checkExist(h))
             {
-                if (parent == null)
-                {
-                    h.pushindex(Glist.Count, -1);
-                }
-                else
-                {
-                    h.pushindex(Glist.Count, parent.getindex());
-                }
-                Glist.Add(h);
-                
-                q.Enqueue(h);
+                push(h, parent);
             }
         }
 
@@ -382,7 +425,7 @@ namespace GraphicHanoi
         {
             Glist.setSize(h.getSize());
             
-            InsertQueue(h, null);
+            push(h, null);
 
             Hanoi answer = h.answer();
 
@@ -404,7 +447,7 @@ namespace GraphicHanoi
                     {
                         if (clone.move(i))
                         {
-                            insertQueue(clone, current);
+                            push(clone, current);
                             clone = current.Clone() as Hanoi;
                         }
                     }
@@ -422,7 +465,7 @@ namespace GraphicHanoi
 
                             if (clone.move(i, j))
                             {
-                                InsertQueue(clone, current);
+                                insertQueue(clone, current);
                                 clone = current.Clone() as Hanoi;
                             }
                         }

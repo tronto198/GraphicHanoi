@@ -8,21 +8,22 @@ namespace GraphicHanoi
 {
     class Hanoi : ICloneable
     {
-        int[] arr;
+        short[] arr;
         int movecount = 0;
         int size = 0;
         int Parentindex = -1;
         int thisindex = 0;
+        int maxs = 0;
 
         public Hanoi(int size)
         {
             this.size = size;
-            arr = new int[size * 3];
+            arr = new short[size * 3];
 
             //첫번째 라인에 기본값 세팅, 나머지 라인도 0으로 세팅
             for (int i = 0; i < this.size; i++)
             {
-                arr[i] = this.size - i;
+                arr[i] = (short)(this.size - i);
             }
             for (int i = this.size; i < this.size * 3; i++)
             {
@@ -162,7 +163,7 @@ namespace GraphicHanoi
             {
                 new_hanoi.arr[i] = 0;
                 new_hanoi.arr[size + i] = 0;
-                new_hanoi.arr[size * 2 + i] = size - i;
+                new_hanoi.arr[size * 2 + i] = (short)(size - i);
             }
 
             return new_hanoi;
@@ -190,15 +191,33 @@ namespace GraphicHanoi
         public int getScore()
         {
             int score = 0;
-            for (int i = 0; i < size; i++)
+            if(arr[size * 2] == size)
             {
-                if (arr[size * 2 + i] == size - i)
+                score = size;
+                for (int i = 1; i < size; i++)
                 {
-                    score++;
+                    if (arr[size * 2 + i] == size - i)
+                    {
+                        score++;
+                    }
+                    else
+                    {
+                        return score;
+                    }
                 }
-                else
+            }
+            else
+            {
+                for(int i = 0;i < size - 1; i++)
                 {
-                    return score;
+                    if(arr[size + i] == size - i - 1)
+                    {
+                        score++;
+                    }
+                    else
+                    {
+                        return score;
+                    }
                 }
             }
             return score;
@@ -243,18 +262,25 @@ namespace GraphicHanoi
         {
             for(int i = 0; i< 3; i++)
             {
-                int value = arr[i * size];
-                if (value < 2) continue;
-                for(int j = 1; j < size; j++)
+                for(int j = size - 1; j > 0; j--)
                 {
                     int index = size * i + j;
-                    if(--value != arr[index])
+                    int value = 1;
+                    if(arr[index] != 0)
                     {
-                        break;
-                    }
-                    if(value == 0)
-                    {
-                        return true;
+                        if(arr[index] == value)
+                        {
+                            value++;
+                            if(value > maxs)
+                            {
+                                maxs = value;
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
                 }
             }
@@ -275,7 +301,7 @@ namespace GraphicHanoi
                 glist[Parentindex].getstack(st, glist);
         }
 
-        public int[] backtracking(Hanoi Son)
+        public short[] backtracking(Hanoi Son)
         {
             int from = 0, to = 0;
             for(int i = 0;i < 3; i++)
@@ -299,17 +325,18 @@ namespace GraphicHanoi
                 }
             }
 
-            return new int[2] { from + 1, to + 1 };
+            return new short[2] { (short)(from + 1), (short)(to + 1) };
         }
 
 
         public object Clone()
         {
             Hanoi newhanoi = new Hanoi(size);
-            newhanoi.arr = arr.Clone() as int[];
+            newhanoi.arr = arr.Clone() as short[];
             newhanoi.movecount = this.movecount;
             newhanoi.Parentindex = Parentindex;
             newhanoi.thisindex = thisindex;
+            newhanoi.maxs = maxs;
             return newhanoi;
         }
     }
@@ -339,7 +366,7 @@ namespace GraphicHanoi
             {
                 list[i] = new List<int>();
             }
-            searchlimit = (int)Math.Pow(2, size);
+            searchlimit = (int)Math.Pow(2, size - 1);
         }
 
         public bool checkExist(Hanoi h)
@@ -350,7 +377,7 @@ namespace GraphicHanoi
             {
                 //if (i > searchlimit) return false;
                 int index = list[hash][list[hash].Count - i - 1];
-                //if (Count - index > searchlimit) return false;
+                if (Count - index > searchlimit) return false;
                 if (h.equal(this[index]))
                 {
                     if (this.Count - index > maxno) maxno = this.Count - index;

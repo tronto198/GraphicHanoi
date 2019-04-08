@@ -51,7 +51,7 @@ namespace GraphicHanoi
 
     class GraphicMap : Graphic_object
     {
-        Queue<int[]> movelist = new Queue<int[]>();
+        Queue<short[]> movelist = new Queue<short[]>();
         const int firsthanoiwidth = 40;
         public const int hanoiheight = 24;
 
@@ -68,9 +68,11 @@ namespace GraphicHanoi
         List<GraphicHanoi> hanoilist = new List<GraphicHanoi>();
         GraphicPillar[] pillars = new GraphicPillar[3];
         GraphicSupp supp = new GraphicSupp();
-        
-        public GraphicMap()
+        Form1 form;
+
+        public GraphicMap(Form1 form)
         {
+            this.form = form;
             x = 0;
             y = 0;
             
@@ -91,10 +93,11 @@ namespace GraphicHanoi
         {
             hanoilist.Clear();
             int maxsize = firsthanoiwidth + upsize * hanoisize;
+            int height = pillar_top_space + hanoisize * hanoiheight;
             for (int i = 0; i < 3; i++)
             {
                 pillars[i].hanoiclear();
-                pillars[i].setSize(firsthanoiwidth / 2, pillar_top_space + hanoisize * hanoiheight);
+                pillars[i].setSize(firsthanoiwidth / 2, height);
                 pillars[i].setLocation(sidespace + (betweenspace + maxsize) * i + maxsize / 2,
                     space_y + (hanoisize * hanoiheight + pillar_top_space) / 2);
             }
@@ -106,7 +109,11 @@ namespace GraphicHanoi
                 pillars[0].Push(h);
             }
             supp.setLocation(pillars[1].x, space_y + pillar_top_space + hanoisize * hanoiheight + support_height / 2);
-            supp.setSize(betweenspace * 4 + maxsize * 3, support_height);
+
+            int width = betweenspace * 4 + maxsize * 3;
+            supp.setSize(width, support_height);
+
+            form.sizechange(width + 300, height + support_height + 200);
         }
 
         public void set(int hanoisize)
@@ -130,7 +137,7 @@ namespace GraphicHanoi
         public override void unShow()
         {
             movelist.Clear();
-            for(int i =0; i < 3; i++)
+            for (int i =0; i < 3; i++)
             {
                 pillars[i].unShow();
             }
@@ -142,7 +149,7 @@ namespace GraphicHanoi
             apply_change();
         }
 
-        public void addmove(int[] ft)
+        public void addmove(short[] ft)
         {
             movelist.Enqueue(ft);
         }
@@ -153,16 +160,22 @@ namespace GraphicHanoi
         {
             if (Mainprogram.nextmove())
             {
-                
-                if (movelist.Count != 0)
+                try
                 {
-                    int[] ft = movelist.Dequeue();
-                    move(ft[0], ft[1]);
+                    if (movelist.Count != 0)
+                    {
+                        short[] ft = movelist.Dequeue();
+                        move(ft[0], ft[1]);
+                    }
+                    else
+                    {
+                        if (moveend != null)
+                            moveend();
+                    }
                 }
-                else
+                catch(Exception e)
                 {
-                    if (moveend != null)
-                        moveend();
+
                 }
             }
         }

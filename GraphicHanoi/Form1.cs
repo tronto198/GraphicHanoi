@@ -12,6 +12,8 @@ namespace GraphicHanoi
 {
     public partial class Form1 : Form
     {
+        const int l_width = 700;
+        const int l_height = 430;
         Mainprogram mp;
         bool pause = false;
         bool playing = false;
@@ -24,6 +26,7 @@ namespace GraphicHanoi
         private void Form1_Load(object sender, EventArgs e)
         {
             tb_hanoiSize.Focus();
+            this.Form1_SizeChanged(null, null);
         }
 
         private void bt_start_Click(object sender, EventArgs e)
@@ -171,7 +174,34 @@ namespace GraphicHanoi
 
         private void Form1_SizeChanged(object sender, EventArgs e)
         {
-            WinFormlib.DoubleBuffering.getinstance().setGraphicSize(this);
+            
+            try
+            {
+                Size s = this.ClientSize;
+                int height = s.Height / 2 - 35;
+                lb_info.Location = new Point(s.Width / 2 - 89, height);
+                tb_hanoiSize.Location = new Point(s.Width / 2 - 45, height);
+                bt_start.Location = new Point(s.Width / 2 + 45, height);
+                WinFormlib.DoubleBuffering.getinstance().setGraphicSize(this);
+                mp.form_sizechange();
+            }
+            catch(Exception ex)
+            {
+
+            }
+            
+        }
+        public void sizechange(int width, int height)
+        {
+            if(width < l_width)
+            {
+                width = l_width;
+            }
+            if(height < l_height)
+            {
+                height = l_height;
+            }
+            this.Size = new Size(width, height);
         }
     }
 }
