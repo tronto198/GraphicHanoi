@@ -192,6 +192,15 @@ namespace WinFormlib
 
         public int interval = 10;
 
+        void action(object obj)
+        {
+            if (!Running)
+            {
+                Running = true;
+                target();
+                Running = false;
+            }
+        }
         /// <summary>
         /// 타이머가 만료될때마다 실행되는 함수 지정
         /// </summary>
@@ -199,15 +208,7 @@ namespace WinFormlib
         public void setCallback(Action target)
         {
             this.target = target;
-            void action(object obj)
-            {
-                if(!Running)
-                {
-                    Running = true;
-                    target();
-                    Running = false;
-                }
-            }
+
             WC = new WaitCallback(action);
         }
 

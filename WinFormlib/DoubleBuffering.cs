@@ -9,6 +9,7 @@ namespace WinFormlib
 {
     public class DoubleBuffering
     {
+        System.Windows.Forms.Form form;
         private Color backcolor = Color.LightBlue;
         private static DoubleBuffering oInstance = null;
         private BufferedGraphics g;
@@ -37,6 +38,36 @@ namespace WinFormlib
             //g = graphics;
         }
 
+        //렌더링(화면에 진짜로 그리기)
+        void Render()
+        {
+            try
+            {
+
+                form.Invoke(new Action(delegate ()
+                {
+                    try
+                    {
+                        Graphics form_g = form.CreateGraphics();
+                        g.Graphics.ResetClip();
+                        g.Render(form_g);
+                        form_g.Dispose();
+                        this.getGraphics.Clear(backcolor);
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+                }));
+
+                Work();
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
         /// <summary>
         /// 윈폼에 맞게 인스턴스 설정
         /// </summary>
@@ -46,37 +77,8 @@ namespace WinFormlib
             if(oInstance == null)
                 oInstance = new DoubleBuffering();
             setGraphicSize(form);
-            
 
-            //렌더링(화면에 진짜로 그리기)
-            void Render()
-            {
-                try
-                {
-                    
-                    form.Invoke(new Action(delegate ()
-                    {
-                        try
-                        {
-                            Graphics form_g = form.CreateGraphics();
-                            g.Graphics.ResetClip();
-                            g.Render(form_g);
-                            form_g.Dispose();
-                            this.getGraphics.Clear(backcolor);
-                        }
-                        catch (Exception e)
-                        {
-
-                        }
-                    }));
-
-                    Work();
-                }
-                catch (Exception e)
-                {
-
-                }
-            }
+            this.form = form;
 
             //여기서부터 타이머 설정
             //8ms마다 Render라는 함수 실행
