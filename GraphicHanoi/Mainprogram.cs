@@ -291,8 +291,6 @@ namespace GraphicHanoi
         public void Endplay()
         {
             playunwrite();
-            
-
         }
 
 
@@ -331,8 +329,9 @@ namespace GraphicHanoi
         {
             int interval = (index - previndex);
             if (interval > maxinterval) maxinterval = interval;
-            indexstr = "move : " + ++movecount + "\nindex : " + index + "\ninterval : " + interval
-                 ;// + "\nmaxinterval : " + maxinterval;
+            indexstr = "move : " + ++movecount + "\nindex : " + index;
+                 // + "\ninterval : " + interval
+                 // + "\nmaxinterval : " + maxinterval;
             previndex = index;
         }
 
