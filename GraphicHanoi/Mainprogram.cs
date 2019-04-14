@@ -384,26 +384,6 @@ namespace GraphicHanoi
 
             q.Enqueue(h);
         }
-        void insertQueue(Hanoi h, Hanoi p)
-        {
-            int score = h.getScore();
-            if (score < maxscore)
-            {
-                return;
-            }
-            else if (score > maxscore)
-            {
-                maxscore = score;
-            }
-            if (!Glist.checkExist(h))
-            {
-                if (h.gets())
-                {
-                    //q.Clear();
-                }
-                push(h, p);
-            }
-        }
         void InsertQueue(Hanoi h, Hanoi parent)
         {
             int score = h.getScore();
@@ -445,7 +425,7 @@ namespace GraphicHanoi
                 {
                     for (int i = 1; i <= 3; i++)
                     {
-                        if (clone.move(i))
+                        if (clone.Req_move(i))
                         {
                             push(clone, current);
                             clone = current.Clone() as Hanoi;
@@ -463,9 +443,9 @@ namespace GraphicHanoi
                                 continue;
                             }
 
-                            if (clone.move(i, j))
+                            if (clone.Req_move(i, j))
                             {
-                                insertQueue(clone, current);
+                                InsertQueue(clone, current);
                                 clone = current.Clone() as Hanoi;
                             }
                         }

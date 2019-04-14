@@ -80,7 +80,7 @@ namespace GraphicHanoi
         }
 
         //출발지 라인에서 목적지 라인으로 탑을 옮기려고 시도, 성공했으면 true, 실패했으면 false
-        public bool move(int from, int to)
+        public bool Req_move(int from, int to)
         {
             int start = size * from - 1;
             int end = size * (from - 1);
@@ -98,6 +98,7 @@ namespace GraphicHanoi
             //움직일 탑이 없으면 false
             return false;
         }
+
 
         bool call_movetoanswer(int no_index, int to)
         {
@@ -133,7 +134,7 @@ namespace GraphicHanoi
             }
             return false;
         }
-        public bool move(int from)
+        public bool Req_move(int from)
         {
             int start = size * from - 1;
             int end = size * (from - 1);
@@ -257,34 +258,6 @@ namespace GraphicHanoi
             //    }
             //}
             //return score;
-        }
-        public bool gets()
-        {
-            for(int i = 0; i< 3; i++)
-            {
-                for(int j = size - 1; j > 0; j--)
-                {
-                    int index = size * i + j;
-                    int value = 1;
-                    if(arr[index] != 0)
-                    {
-                        if(arr[index] == value)
-                        {
-                            value++;
-                            if(value > maxs)
-                            {
-                                maxs = value;
-                                return true;
-                            }
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-            }
-            return false;
         }
 
         public void pushindex(int thisi, int parenti)
