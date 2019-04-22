@@ -13,7 +13,6 @@ namespace GraphicHanoi
         int size = 0;
         int Parentindex = -1;
         int thisindex = 0;
-        int maxs = 0;
 
         public Hanoi(int size)
         {
@@ -309,7 +308,6 @@ namespace GraphicHanoi
             newhanoi.movecount = this.movecount;
             newhanoi.Parentindex = Parentindex;
             newhanoi.thisindex = thisindex;
-            newhanoi.maxs = maxs;
             return newhanoi;
         }
     }
@@ -317,7 +315,7 @@ namespace GraphicHanoi
 
     class Hanoilist : List<Hanoi>
     {
-        List<int>[] list;
+        List<int>[] Hashinglist;
         int searchlimit;
         public int maxno = 0;
 
@@ -326,7 +324,7 @@ namespace GraphicHanoi
             int hash = h.gethash();
             int index = base.Count;
             base.Add(h);
-            list[hash].Add(index);
+            Hashinglist[hash].Add(index);
         }
 
         public void setSize(int size)
@@ -334,10 +332,10 @@ namespace GraphicHanoi
             maxno = 0;
             int listsize = (size - 1) * 2;
             //int listsize = size + 1;
-            list = new List<int>[listsize];
+            Hashinglist = new List<int>[listsize];
             for (int i = 0; i < listsize; i++)
             {
-                list[i] = new List<int>();
+                Hashinglist[i] = new List<int>();
             }
             searchlimit = (int)Math.Pow(2, size - 1);
         }
@@ -346,10 +344,9 @@ namespace GraphicHanoi
         {
             int hash = h.gethash();
             
-            for(int i = 0; i <list[hash].Count; i++)
+            for(int i = 0; i <Hashinglist[hash].Count; i++)
             {
-                //if (i > searchlimit) return false;
-                int index = list[hash][list[hash].Count - i - 1];
+                int index = Hashinglist[hash][Hashinglist[hash].Count - i - 1];
                 if (Count - index > searchlimit) return false;
                 if (h.equal(this[index]))
                 {
@@ -362,4 +359,5 @@ namespace GraphicHanoi
 
         
     }
+
 }
